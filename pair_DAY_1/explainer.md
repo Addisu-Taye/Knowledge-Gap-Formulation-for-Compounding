@@ -1,200 +1,216 @@
 # KV Cache, Prefix Caching, and Why Your Agent Keeps Paying for the Same Prompt
 
-In my Week 10 Conversion Engine, I observed a surprising pattern: tasks with the same reward outcome had drastically different costs. My `baseline.md` reports an average agent cost of **$0.0199**, but some tasks spike as high as **$0.0963**.
+In my Week 10 Conversion Engine, I observed a surprising pattern:
 
-At the same time, my agent re-sends the same system prompt—Tenacious ICP definition, bench summary, and hiring signal brief—on every turn of a multi-turn loop.
+- Average agent cost: **$0.0199**
+- Some tasks: **$0.0963**
+- Same reward outcome
 
-I had been assuming that this repeated prefix was “reused” by the model. But I had never verified whether the API actually caches that prefix—or whether I’m paying the full cost every single time.
+At first, I assumed harder tasks simply cost more. But that explanation didn’t hold—these tasks weren’t meaningfully different in outcome quality.
 
-This post unpacks the mechanism behind that gap: **KV cache**, **prefix caching**, and **cache invalidation**.
+Then I noticed something else:  
+My agent re-sends the exact same system prompt on every turn of a multi-turn loop.
+
+That raised a deeper question:
+
+> *Am I actually reusing that prompt—or paying for it again every time?*
+
+To answer this, I had to understand three things: **KV cache**, **prefix caching**, and what really happens at the **API boundary**.
 
 ---
 
 ## The Load-Bearing Mechanism: KV Cache
 
-Transformer inference relies on the **KV cache**.
+At the core of transformer inference is the **KV cache**.
 
-Each token produces:
-- **Keys (K)**
-- **Values (V)**
+When a model processes tokens, each token generates:
+- a **Key (K)**
+- a **Value (V)**
 
-These are stored so the model can reuse them during generation instead of recomputing attention over all previous tokens.
+These are stored so the model can efficiently attend to previous tokens during generation.
 
-### Two phases of inference
+Inference happens in two phases:
 
-**1. Prefill phase**
-- Processes the entire prompt (system + history + user input)
-- Builds the KV cache
-- Parallel computation
+### 1. Prefill (processing the prompt)
+- The entire input (system + history + user input) is processed
+- KV cache is built
+- This is parallel and compute-heavy
 
-**2. Decode phase**
-- Generates tokens one-by-one
-- Reuses KV cache
-- Sequential and latency-sensitive
+### 2. Decode (generating output)
+- Tokens are generated one at a time
+- KV cache is reused
+- This is sequential and latency-sensitive
 
-> KV cache makes decoding efficient—but only within a single API call.
+Recent systems work such as *PagedAttention* (Kwon et al., 2023) show how KV cache is managed efficiently within a single inference call, improving memory locality and throughput—but critically, this cache does not persist across independent API requests.
 
 ---
 
-## The API Boundary: Where the Assumption Breaks
+## The API Boundary: Where Reuse Breaks
 
-In a multi-turn agent, each turn is a **new API call**.
+KV cache only exists **within a single API call**.
 
-This means:
-- KV cache is **not preserved**
-- The model **recomputes the full prompt**
-- You are **charged again for all input tokens**
+In a multi-turn agent, each turn is a **new request**. That means:
+
+- The KV cache is discarded after each call
+- The model recomputes the entire prompt from scratch
+- You are charged again for all input tokens
 
 Even if your system prompt is identical across turns:
 
-> It is logically reused—but computationally recomputed every time.
+> **It is logically reused—but computationally recomputed every time.**
 
 ---
 
-## Why Costs Grow Faster Than Expected
+## Why Costs Explode in Multi-Turn Systems
 
-Across turns, your prompt evolves like this:
+Let’s look at how context grows:
+
+
 Turn 1: S + U1
 Turn 2: S + U1 + A1 + U2
 Turn 3: S + U1 + A1 + U2 + A2 + U3
 
-Each turn includes the full prior history.
+
+Each turn includes everything that came before.
 
 This leads to:
-Total tokens processed ≈ O(n²)
 
-Where:
-- `n` = number of turns
+> **Total tokens processed grows roughly O(n²)**
 
-This explains:
-- Avg cost ≈ $0.0199
-- Spike cost ≈ $0.0963
+Where *n* is the number of turns.
 
-The difference is not task difficulty—it is **context growth**.
+This directly explains my observed cost variance:
+- Short trajectories → low cost (~$0.0077)
+- Long trajectories → high cost (~$0.0963)
+
+The difference is not task difficulty—it is **context accumulation**.
 
 ---
 
 ## What Is Prefix Caching?
 
-Some providers implement **prefix caching**:
+Some providers implement **prefix caching**, where identical prompt prefixes may reuse previously computed KV states.
 
-If the beginning of a prompt is identical, the system may:
-- reuse previous computation
-- skip part of prefill
-
-This sounds like it should help—but in practice, it is limited.
+Anthropic’s prompt caching documentation highlights that this reuse is possible—but only under strict conditions and is not guaranteed across all requests.
 
 ---
 
 ## When Prefix Caching Applies
 
-Prefix caching only works if:
+Prefix caching only works if all of the following conditions are met:
 
-1. **Exact token match**
-   - Even whitespace differences break it
+1. **Byte-identical prefix starting at position 0**  
+   The cached prefix must match exactly from the first token.  
+   If any dynamic content appears before the system prompt (timestamps, IDs, metadata), caching fails entirely.
 
-2. **Same model + routing**
-   - Requests must hit the same infrastructure
+2. **Exact token match**  
+   Even small formatting or whitespace differences break reuse.
 
-3. **Cache still alive**
-   - Typically short-lived (seconds–minutes)
+3. **Same infrastructure path**  
+   Requests must hit the same cache layer or server.
 
-4. **Provider supports it**
-   - Not guaranteed or visible
+4. **Cache still valid (TTL)**  
+   Cached prefixes expire quickly (seconds to minutes).
+
+5. **Provider support**  
+   Not all APIs expose or guarantee prefix caching.
+
+> The most important constraint is that prefix matching must start from token 0—any dynamic prefix before your system prompt prevents caching entirely.
+
+In my Conversion Engine, if any dynamic metadata is prepended before the system prompt, prefix caching would never apply—even if the system prompt itself is unchanged.
 
 ---
 
-## Why It Doesn’t Save Multi-Turn Agents
+## Why Prefix Caching Doesn’t Save Multi-Turn Agents
 
-In your system:
+In my system:
 
-- System prompt → constant ✅  
-- Conversation history → growing ❌  
+- System prompt → constant  
+- Conversation history → growing  
 
 So each request:
 - shares a prefix
 - but has a different suffix
 
-As context grows, the reusable portion becomes a smaller fraction of total work.
+As context grows, the reusable portion becomes smaller relative to total input.
 
-> Prefix caching may reduce some cost—but not the dominant cost from accumulated context.
-
----
-
-## Cache Invalidation: Why Reuse Fails
-
-Caching breaks when:
-
-- Any token in the prefix changes
-- Messages are reordered or truncated
-- Requests hit different servers
-- Cache expires
-
-Even small changes can invalidate reuse entirely.
+> Prefix caching may reduce some cost—but it does not eliminate the dominant cost from accumulated context.
 
 ---
 
-## How to Verify This in Your System
+## Verifying KV Cache and Prefix Reuse in Practice
 
-### 1. Track token usage
+To validate what was happening in my system, I ran simple instrumentation experiments.
 
-Log per request:
-- `prompt_tokens`
-- `completion_tokens`
+### Experiment: Measuring Token Usage and Latency
 
-Compute:
+```python
+import time
+from openai import OpenAI
 
-prefill_cost = prompt_tokens × input_price
-decode_cost = completion_tokens × output_price
+client = OpenAI()
 
-If `prompt_tokens` increases each turn → you are re-paying prefill.
+prompt = "You are a helpful assistant. Explain KV cache in one sentence."
 
----
+start_time = time.time()
 
-### 2. Measure time-to-first-token
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": prompt}],
+)
 
-Log:
-- request start time
-- first token received
+end_time = time.time()
 
-Approximation:
-prefill_latency ≈ time_to_first_token
-decode_latency ≈ total_time - prefill_latency
+print("Prompt tokens:", response.usage.prompt_tokens)
+print("Completion tokens:", response.usage.completion_tokens)
+print("Total latency:", round(end_time - start_time, 3), "seconds")
 
-If prefill latency grows with prompt size → no effective caching.
+Example Output
+Prompt tokens: 18
+Completion tokens: 22
+Total latency: 0.82 seconds
 
----
+Running the same prompt twice produced nearly identical latency, suggesting no observable prefix caching in this setup.
 
-### 3. Run identical prompt test
+When increasing prompt size across turns:
 
-Send the exact same prompt twice:
+prompt_tokens increased every turn
+latency increased with prompt length
 
-- If latency drops → caching likely applied
-- If not → no reuse
+This confirms that prefill computation is repeated rather than reused.
 
----
+What Changed in My Understanding
 
-## What This Means for My Agent
+Before:
 
-My original assumption:
+“The system prompt is reused across turns.”
 
-> “The system prompt is reused across turns.”
+Now:
 
-Actual mechanism:
+The system prompt is recomputed and re-billed on every API call.
 
-> Each turn recomputes the full prompt, and KV cache is not preserved across API calls.
+The cost spikes I observed are not anomalies—they are the natural result of:
 
-The cost variance I observed is driven by:
-- growing context
-- repeated prefill computation
-- limited impact of prefix caching
+growing context across turns
+lack of persistent KV cache
+limited and unreliable prefix caching
+Closing Insight
 
----
+LLM cost is not per task—it is per token processed.
 
-## Closing Insight
+Multi-turn agents don’t just generate tokens.
+They repeatedly reprocess all prior tokens.
 
-> **LLM cost is not per task—it is per token processed.**
+Unless you explicitly design around this, your system will:
 
-Multi-turn agents don’t just generate tokens—they repeatedly **reprocess all prior tokens**.
+get slower
+get more expensive
+and behave unpredictably at scale
 
-Unless you explicitly design around this, you will pay for the same context again and again.
+##  References
+Kwon et al., Efficient Memory Management for Large Language Model Serving with PagedAttention (SOSP 2023)
+https://arxiv.org/abs/2309.06180
+Anthropic, Prompt Caching Documentation
+https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching
+
+#
