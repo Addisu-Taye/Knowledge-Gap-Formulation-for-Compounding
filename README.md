@@ -50,6 +50,7 @@ Prompting changes token probabilities. Constrained decoding changes the allowed 
 
 ### Public Artifact
 - Blog:https://open.substack.com/pub/addistaye/p/why-please-return-json-fails-function?r=6am66u&utm_campaign=post&utm_medium=web&showWelcomeOnShare=true
+
 - LinkedIn Thread: https://www.linkedin.com/posts/addisu-taye_why-please-return-json-fails-function-share-7457792180317822977-NOBy?utm_source=share&utm_medium=member_desktop&rcm=ACoAAA6NaS4BMXIbB7-C664MF80rOndMGtMofc8
 
 ---
@@ -101,8 +102,9 @@ Prompting usually does not create new capabilities. It activates and steers late
 
 ## Public Artifacts
 
-- Blog: (add Substack link after publishing)
-- Thread: (add LinkedIn thread link after posting)
+- Blog: https://open.substack.com/pub/addistaye/p/what-pretraining-actually-learns?r=6am66u&utm_campaign=post&utm_medium=web&showWelcomeOnShare=true
+
+- Thread: (https://www.linkedin.com/posts/addisu-taye_ai-llm-machinelearning-share-7458155080102371329-5imN?utm_source=share&utm_medium=member_desktop&rcm=ACoAAA6NaS4BMXIbB7-C664MF80rOndMGtMofc8)
 
 ---
 
