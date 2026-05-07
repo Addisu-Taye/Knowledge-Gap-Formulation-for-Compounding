@@ -85,3 +85,34 @@ This repository also serves as a public technical-writing portfolio documenting:
 - debugging process,
 - mechanism-level explanations,
 - and engineering tradeoffs in modern AI systems.
+
+
+
+# Day 3 Focus
+
+## Topic
+Training and post-training mechanics.
+
+## Subtopic
+What pretraining actually learns vs what prompting activates.
+
+## Key Insight
+Prompting usually does not create new capabilities. It activates and steers latent capabilities already learned during pretraining by changing inference-time context conditioning.
+
+## Public Artifacts
+
+- Blog: (add Substack link after publishing)
+- Thread: (add LinkedIn thread link after posting)
+
+---
+
+## Concepts Explored
+
+- Pretraining
+- Instruction tuning
+- RLHF
+- In-context learning
+- Latent capability activation
+- Behavioral steering
+- Prompt conditioning
+- Next-token prediction
