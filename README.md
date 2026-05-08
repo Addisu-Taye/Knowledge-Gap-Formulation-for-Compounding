@@ -104,7 +104,7 @@ Prompting usually does not create new capabilities. It activates and steers late
 
 - Blog: https://open.substack.com/pub/addistaye/p/what-pretraining-actually-learns?r=6am66u&utm_campaign=post&utm_medium=web&showWelcomeOnShare=true
 
-- Thread: (https://www.linkedin.com/posts/addisu-taye_ai-llm-machinelearning-share-7458155080102371329-5imN?utm_source=share&utm_medium=member_desktop&rcm=ACoAAA6NaS4BMXIbB7-C664MF80rOndMGtMofc8)
+- Thread: https://www.linkedin.com/posts/addisu-taye_ai-llm-machinelearning-share-7458155080102371329-5imN?utm_source=share&utm_medium=member_desktop&rcm=ACoAAA6NaS4BMXIbB7-C664MF80rOndMGtMofc8
 
 ---
 
@@ -118,3 +118,32 @@ Prompting usually does not create new capabilities. It activates and steers late
 - Behavioral steering
 - Prompt conditioning
 - Next-token prediction
+
+# Day 4 Focus
+
+## Topic
+Evaluation and statistics.
+
+## Subtopic
+Bootstrap confidence intervals for agent benchmarks and statistical defensibility.
+
+## Key Insight
+Bootstrap methods are only meaningful if the resampling procedure matches the statistic being estimated. A confidence interval is not automatically trustworthy simply because it was produced by a bootstrap pipeline.
+
+## Public Artifacts
+
+- Blog: (add Substack link after publishing)
+- Thread: (add LinkedIn link after posting)
+
+---
+
+## Concepts Explored
+
+- paired bootstrap
+- confidence intervals
+- benchmark uncertainty
+- statistical defensibility
+- task-level resampling
+- p-value interpretation
+- scaffolded evaluation
+- model-card claims
