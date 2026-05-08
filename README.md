@@ -132,8 +132,10 @@ Bootstrap methods are only meaningful if the resampling procedure matches the st
 
 ## Public Artifacts
 
-- Blog: (add Substack link after publishing)
-- Thread: (add LinkedIn link after posting)
+- Blog: https://open.substack.com/pub/addistaye/p/why-my-benchmark-confidence-interval?r=6am66u&utm_campaign=post&utm_medium=web&showWelcomeOnShare=true
+
+
+- Thread: https://www.linkedin.com/posts/addisu-taye_ai-llm-machinelearning-share-7458474229689180160-pT1T?utm_source=share&utm_medium=member_desktop&rcm=ACoAAA6NaS4BMXIbB7-C664MF80rOndMGtMofc8
 
 ---
 
