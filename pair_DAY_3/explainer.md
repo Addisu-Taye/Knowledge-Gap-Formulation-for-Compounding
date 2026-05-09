@@ -1,5 +1,5 @@
 # What Pretraining Actually Learns vs What Prompting Activates
-
+Ruth Solomon asked me
 In my Week 10 Conversion Engine, I noticed something surprising: changing prompt constraints and structured instructions significantly improved output formatting, reasoning style, and agent behavior — even though the underlying model weights never changed.
 
 At first this felt almost magical.

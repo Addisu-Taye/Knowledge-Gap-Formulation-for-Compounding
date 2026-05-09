@@ -1,7 +1,9 @@
 # Evening Call Summary
 
-The explainer successfully clarified that KV cache is only preserved within a single API call and is not carried across turns in a multi-turn agent. The distinction between logical reuse of prompts and computational reuse was especially helpful.
+The initial explainer was strong on prefill vs decode mechanics and provided solid trace-based analysis, but it did not fully close my original gap around KV cache behavior across API calls and prefix caching. In particular, it did not explicitly state that KV cache does not persist across API calls, which is the core reason my system prompt is recomputed every turn.
 
-Feedback focused on making prefix caching conditions more explicit and emphasizing that it is not guaranteed in most API setups. The section on cache invalidation was strengthened by adding concrete failure cases (token mismatch, routing differences, TTL expiry).
+During the call, I pushed on this gap. We clarified that while the system prompt is logically reused, it is computationally recomputed on every API call, leading to repeated prefill cost. This distinction was added explicitly in the revised version.
 
-The revised version more clearly connects the mechanism to the observed cost spikes in the system and provides actionable ways to verify caching behavior through instrumentation.
+Feedback also focused on prefix caching. The initial version mentioned it but did not define the conditions under which it applies. The revised version now includes the key constraint that prefix matching must be byte-identical from token position 0, along with concrete failure cases such as dynamic prefixes, routing differences, and cache expiration.
+
+The final revision more clearly connects these mechanisms to the observed cost spikes in my Conversion Engine and provides concrete instrumentation strategies (token tracking, TTFT measurement, repeated prompt tests) to verify caching behavior in practice.
