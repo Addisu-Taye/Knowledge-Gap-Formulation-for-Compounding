@@ -154,33 +154,6 @@ Bootstrap methods are only meaningful if the resampling procedure matches the st
 
 # Day 5 Focus
 
-## Topic
-Training and post-training mechanics.
-
-## Subtopic
-What LoRA actually adapts; why low rank works; what changes at higher rank.
-
-## Key Insight
-LoRA works because pretrained transformers already contain rich latent capability structure. Low-rank adapters steer existing representation geometry rather than creating entirely new reasoning systems.
-
-## Public Artifacts
-
-- Blog: (add Substack link)
-- Thread: (add LinkedIn thread link)
-
----
-
-## Concepts Explored
-
-- LoRA
-- QLoRA
-- Low-rank adaptation
-- Representation geometry
-- Fine-tuning efficiency
-- Attention projection updates
-- Adaptation subspaces
-- Rank vs expressive capacity
-
 ---
 
 # Final Submission Artifacts
@@ -253,6 +226,7 @@ to:
 AI systems at mechanism level.
 
 The biggest outcome of Week 12 was developing:
+
 > mechanism-level reasoning discipline.
 
 That shift fundamentally changed how I approach:
