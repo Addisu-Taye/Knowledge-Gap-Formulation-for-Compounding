@@ -149,3 +149,115 @@ Bootstrap methods are only meaningful if the resampling procedure matches the st
 - p-value interpretation
 - scaffolded evaluation
 - model-card claims
+
+---
+
+# Day 5 Focus
+
+## Topic
+Training and post-training mechanics.
+
+## Subtopic
+What LoRA actually adapts; why low rank works; what changes at higher rank.
+
+## Key Insight
+LoRA works because pretrained transformers already contain rich latent capability structure. Low-rank adapters steer existing representation geometry rather than creating entirely new reasoning systems.
+
+## Public Artifacts
+
+- Blog: (add Substack link)
+- Thread: (add LinkedIn thread link)
+
+---
+
+## Concepts Explored
+
+- LoRA
+- QLoRA
+- Low-rank adaptation
+- Representation geometry
+- Fine-tuning efficiency
+- Attention projection updates
+- Adaptation subspaces
+- Rank vs expressive capacity
+
+---
+
+# Final Submission Artifacts
+
+## Root-Level Documents
+
+- `synthesis.md`
+- `canonical_list.md`
+- `portfolio_update.md`
+
+---
+
+# Evidence-Graph Integrity
+
+Every:
+- blog post,
+- LinkedIn thread,
+- grounding commit,
+- explainer,
+- and synthesis claim
+
+is grounded in at least one of:
+- canonical papers,
+- authoritative documentation,
+- benchmark artifacts,
+- implementation evidence,
+- runnable code,
+- or partner sign-off.
+
+This repository is designed to make every major technical claim traceable and reproducible.
+
+---
+
+# Canonical Sources Referenced Across the Week
+
+## Papers
+
+- Vaswani et al. — *Attention Is All You Need*
+- Brown et al. — *Language Models are Few-Shot Learners*
+- Ouyang et al. — *Training Language Models to Follow Instructions with Human Feedback*
+- Wei et al. — *Chain-of-Thought Prompting Elicits Reasoning in Large Language Models*
+- Hu et al. — *LoRA: Low-Rank Adaptation of Large Language Models*
+- Dettmers et al. — *QLoRA*
+- Efron & Tibshirani — *An Introduction to the Bootstrap*
+
+---
+
+## Documentation and Tools
+
+- Anthropic Tool Use Documentation
+- Anthropic Prefix Caching Documentation
+- OpenAI Structured Outputs Documentation
+- SciPy Bootstrap Documentation
+- OpenRouter experimentation workflows
+
+---
+
+# Final Reflection
+
+The cumulative trajectory across Weeks 10, 11, and 12 moved from:
+- building AI systems,
+
+to:
+- building,
+- evaluating,
+- auditing,
+- explaining,
+- and defending
+
+AI systems at mechanism level.
+
+The biggest outcome of Week 12 was developing:
+> mechanism-level reasoning discipline.
+
+That shift fundamentally changed how I approach:
+- prompting,
+- inference,
+- evaluation,
+- adaptation,
+- and production reliability in modern AI systems.
